@@ -1,14 +1,27 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { getDataDir, getDocumentsDir, getSeedsPath } from "@/lib/paths";
-import type { BrandContext, GenerationRecord, KbChunk, KbDocument } from "./types";
+import {
+  getDataDir,
+  getDistillatesDir,
+  getDocumentsDir,
+  getSeedsPath,
+} from "@/lib/paths";
+import type {
+  BrandContext,
+  DocumentDistillate,
+  GenerationRecord,
+  KbChunk,
+  KbDocument,
+  MarkdownPage,
+} from "./types";
 
 const CHUNK_SIZE = 4500;
 
 async function ensureDirs() {
   await fs.mkdir(getDocumentsDir(), { recursive: true });
   await fs.mkdir(path.join(getDataDir(), "seeds"), { recursive: true });
+  await fs.mkdir(getDistillatesDir(), { recursive: true });
 }
 
 async function readJson<T>(file: string, fallback: T): Promise<T> {
@@ -36,26 +49,53 @@ function generationsPath() {
   return path.join(getDataDir(), "generations.json");
 }
 
-export function chunkText(
-  documentId: string,
-  pages: { page: number; text: string }[],
-): KbChunk[] {
+function distillatePath(documentId: string) {
+  return path.join(getDistillatesDir(), `${documentId}.json`);
+}
+
+export function chunkText(documentId: string, pages: MarkdownPage[]): KbChunk[] {
   const chunks: KbChunk[] = [];
   let ord = 0;
-  for (const { page, text } of pages) {
+
+  for (const { page, text, heading_path, section_ord } of pages) {
     if (!text) continue;
-    for (let i = 0; i < text.length; i += CHUNK_SIZE) {
-      const part = text.slice(i, i + CHUNK_SIZE);
+
+    const prefix = heading_path ? `## ${heading_path}\n\n` : "";
+    const body = text.trim();
+    const fullText = prefix + body;
+
+    if (fullText.length <= CHUNK_SIZE) {
       chunks.push({
         id: randomUUID(),
         document_id: documentId,
         ord: ord++,
         page,
-        content: part,
-        token_estimate: Math.ceil(part.length / 4),
+        content: fullText,
+        token_estimate: Math.ceil(fullText.length / 4),
+        heading_path,
+        section_ord,
       });
+      continue;
+    }
+
+    let offset = 0;
+    while (offset < body.length) {
+      const slice = body.slice(offset, offset + CHUNK_SIZE);
+      const chunkContent = offset === 0 ? prefix + slice : slice;
+      chunks.push({
+        id: randomUUID(),
+        document_id: documentId,
+        ord: ord++,
+        page,
+        content: chunkContent,
+        token_estimate: Math.ceil(chunkContent.length / 4),
+        heading_path,
+        section_ord,
+      });
+      offset += CHUNK_SIZE;
     }
   }
+
   return chunks;
 }
 
@@ -72,6 +112,11 @@ export async function getDocument(id: string): Promise<KbDocument | null> {
   return docs.find((d) => d.id === id) ?? null;
 }
 
+export async function findSeedByFilename(filename: string): Promise<KbDocument | null> {
+  const docs = await listDocuments();
+  return docs.find((d) => d.is_seed && d.filename === filename) ?? null;
+}
+
 export async function listAllChunks(): Promise<KbChunk[]> {
   return readJson<KbChunk[]>(chunksPath(), []);
 }
@@ -84,13 +129,28 @@ export async function getChunksForDocuments(documentIds: string[]): Promise<KbCh
     .sort((a, b) => a.document_id.localeCompare(b.document_id) || a.ord - b.ord);
 }
 
-export async function saveDocument(params: {
+export async function loadDistillate(documentId: string): Promise<DocumentDistillate | null> {
+  return readJson<DocumentDistillate | null>(distillatePath(documentId), null);
+}
+
+export async function saveDistillate(distillate: DocumentDistillate): Promise<void> {
+  await ensureDirs();
+  await writeJson(distillatePath(distillate.document_id), distillate);
+}
+
+type SaveDocumentParams = {
   title: string;
   filename: string;
   mime: string;
   bytes: Uint8Array;
-  pages: { page: number; text: string }[];
-}): Promise<{ id: string; pages: number; chunks: number }> {
+  pages: MarkdownPage[];
+  is_seed?: boolean;
+  summary?: string | null;
+  cluster?: string | null;
+  doc_series?: string | null;
+};
+
+async function persistDocument(params: SaveDocumentParams): Promise<{ id: string; pages: number; chunks: number }> {
   await ensureDirs();
   const id = randomUUID();
   const ext = path.extname(params.filename) || ".bin";
@@ -107,8 +167,10 @@ export async function saveDocument(params: {
     byte_size: params.bytes.byteLength,
     page_count: params.pages.length || 1,
     status: "ready",
-    is_seed: false,
-    summary: null,
+    is_seed: params.is_seed ?? false,
+    summary: params.summary ?? null,
+    cluster: params.cluster ?? null,
+    doc_series: params.doc_series ?? null,
     created_at: new Date().toISOString(),
   };
 
@@ -123,6 +185,26 @@ export async function saveDocument(params: {
   return { id, pages: doc.page_count ?? 0, chunks: newChunks.length };
 }
 
+export async function saveDocument(params: Omit<SaveDocumentParams, "is_seed">) {
+  return persistDocument({ ...params, is_seed: false });
+}
+
+export async function saveSeedDocument(
+  params: Omit<SaveDocumentParams, "is_seed">,
+): Promise<{ id: string; pages: number; chunks: number; skipped: boolean }> {
+  const existing = await findSeedByFilename(params.filename);
+  if (existing) {
+    return {
+      id: existing.id,
+      pages: existing.page_count ?? 0,
+      chunks: (await getChunksForDocuments([existing.id])).length,
+      skipped: true,
+    };
+  }
+  const result = await persistDocument({ ...params, is_seed: true });
+  return { ...result, skipped: false };
+}
+
 export async function deleteDocument(id: string): Promise<void> {
   const docs = await listDocuments();
   const doc = docs.find((d) => d.id === id);
@@ -133,6 +215,12 @@ export async function deleteDocument(id: string): Promise<void> {
     await fs.unlink(path.join(getDocumentsDir(), doc.storage_path));
   } catch {
     /* ignore missing file */
+  }
+
+  try {
+    await fs.unlink(distillatePath(id));
+  } catch {
+    /* ignore missing distillate */
   }
 
   await writeJson(
@@ -174,4 +262,18 @@ export async function saveGeneration(record: Omit<GenerationRecord, "id" | "crea
   all.unshift(entry);
   await writeJson(generationsPath(), all.slice(0, 500));
   return entry;
+}
+
+export async function findDocumentsByFilenames(filenames: string[]): Promise<KbDocument[]> {
+  const docs = await listDocuments();
+  const set = new Set(filenames);
+  return docs.filter((d) => set.has(d.filename));
+}
+
+export async function updateDocumentSummary(documentId: string, summary: string): Promise<void> {
+  const docs = await listDocuments();
+  const idx = docs.findIndex((d) => d.id === documentId);
+  if (idx === -1) return;
+  docs[idx] = { ...docs[idx], summary };
+  await writeJson(indexPath(), docs);
 }

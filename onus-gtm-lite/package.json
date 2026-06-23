@@ -10,7 +10,10 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:kb": "tsx scripts/seed-kb.ts",
+    "test:ingest": "vitest run src/lib/kb/ingest.test.ts",
+    "test:translation": "tsx scripts/run-translation-fixtures.ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
@@ -34,8 +37,10 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite": "^8.0.16",
-    "vite-tsconfig-paths": "^6.0.2"
+    "vite-tsconfig-paths": "^6.0.2",
+    "vitest": "^3.2.4"
   }
 }

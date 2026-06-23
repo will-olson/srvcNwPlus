@@ -1,11 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { distillDocument } from "@/lib/kb/distill";
 import { detectMime, extractByMime } from "@/lib/kb/ingest";
 import {
   deleteDocument,
   listDocuments,
   listGenerations,
   saveDocument,
+  updateDocumentSummary,
 } from "@/lib/kb/store";
 import { runGroundedGeneration } from "@/lib/generate";
 import type { KbDocument } from "@/lib/kb/types";
@@ -32,13 +34,23 @@ export const uploadKbDocument = createServerFn({ method: "POST" })
     if (!pages.some((p) => p.text.trim())) {
       throw new Error("No extractable text found in document.");
     }
-    return saveDocument({
+
+    const saved = await saveDocument({
       title: data.title,
       filename: data.filename,
       mime,
       bytes,
       pages,
     });
+
+    const { summary } = await distillDocument({
+      documentId: saved.id,
+      title: data.title,
+      pages,
+    });
+    await updateDocumentSummary(saved.id, summary.slice(0, 2000));
+
+    return { ...saved, summaryLength: summary.length };
   });
 
 export const deleteKbDocument = createServerFn({ method: "POST" })

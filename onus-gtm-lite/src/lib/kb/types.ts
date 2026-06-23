@@ -9,6 +9,8 @@ export type KbDocument = {
   status: string;
   is_seed: boolean;
   summary: string | null;
+  cluster?: string | null;
+  doc_series?: string | null;
   created_at: string;
 };
 
@@ -19,6 +21,8 @@ export type KbChunk = {
   page: number;
   content: string;
   token_estimate: number;
+  heading_path?: string;
+  section_ord?: number;
 };
 
 export type GenerationRecord = {
@@ -35,4 +39,46 @@ export type BrandContext = {
   brand_wiki_sections: Array<{ title: string; body_md: string }>;
   content_pillars: Array<{ slug: string; title: string; theme?: string }>;
   personas: Array<{ slug: string; name: string }>;
+};
+
+export type MarkdownPage = {
+  page: number;
+  text: string;
+  heading_path?: string;
+  section_ord?: number;
+};
+
+export type SectionIndexEntry = {
+  heading: string;
+  page: number;
+  char_start: number;
+  char_end: number;
+  keywords: string[];
+};
+
+export type DocumentDistillate = {
+  document_id: string;
+  purpose?: string;
+  category?: string;
+  doc_series?: string | null;
+  section_index: SectionIndexEntry[];
+  summary?: string;
+  key_claims?: string[];
+};
+
+export type KbManifestEntry = {
+  cluster: "echelon" | "profound" | "monte-carlo";
+  series?: "A" | "B" | "C" | null;
+  title: string;
+};
+
+export type TranslationFixture = {
+  id: string;
+  label: string;
+  useCaseId: string;
+  discipline: string;
+  documentFilenames: string[];
+  fieldValues: Record<string, string>;
+  expectCitationsFrom: string[];
+  expectTerms: string[];
 };

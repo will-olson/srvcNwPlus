@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { CLUSTER_LABELS, CLUSTER_ORDER } from "@/config/translation-presets";
 import type { KbDocument } from "@/lib/kb/types";
 
 export function SourcePanel({
@@ -23,11 +24,60 @@ export function SourcePanel({
     !q.trim() ? true : d.title.toLowerCase().includes(q.toLowerCase()),
   );
 
+  const grouped = CLUSTER_ORDER.map((cluster) => ({
+    cluster,
+    label: CLUSTER_LABELS[cluster] ?? cluster,
+    docs: filtered.filter((d) => d.is_seed && d.cluster === cluster),
+  })).filter((g) => g.docs.length > 0);
+
+  const ungrouped = filtered.filter(
+    (d) => !d.is_seed || !d.cluster || !CLUSTER_ORDER.includes(d.cluster as (typeof CLUSTER_ORDER)[number]),
+  );
+
   const toggle = (id: string) => {
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);
     else next.add(id);
     setSelected(next);
+  };
+
+  const renderDoc = (d: KbDocument) => {
+    const on = selected.has(d.id);
+    return (
+      <label
+        key={d.id}
+        className={`flex items-center gap-2 cursor-pointer px-1 py-1 ${on ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+      >
+        <span
+          onClick={(e) => {
+            e.preventDefault();
+            toggle(d.id);
+          }}
+          className="inline-flex items-center justify-center h-4 w-4 border text-[10px] leading-none shrink-0"
+          style={
+            on
+              ? {
+                  borderColor: "var(--studio-accent)",
+                  backgroundColor: "var(--studio-accent)",
+                  color: "var(--background)",
+                }
+              : { borderColor: "var(--border)" }
+          }
+        >
+          {on ? "▸" : ""}
+        </span>
+        <input type="checkbox" checked={on} onChange={() => toggle(d.id)} className="sr-only" />
+        <span className="flex-1 truncate">{d.title}</span>
+        {d.is_seed && (
+          <span className="text-[8px] uppercase tracking-[0.14em] px-1 border border-border text-muted-foreground shrink-0">
+            seed
+          </span>
+        )}
+        <span className="num text-[9px] uppercase tracking-[0.16em] text-muted-foreground shrink-0">
+          {d.page_count ?? "?"}p
+        </span>
+      </label>
+    );
   };
 
   return (
@@ -89,42 +139,29 @@ export function SourcePanel({
       )}
       {loading && <p className="text-xs text-muted-foreground">Loading sources…</p>}
       {!loading && docs.length === 0 && (
-        <p className="text-xs text-muted-foreground">No documents yet. Upload to begin.</p>
+        <p className="text-xs text-muted-foreground">
+          No documents yet. Run <code className="num">npm run seed:kb</code> or upload to begin.
+        </p>
       )}
-      <div className="font-mono text-[11px] leading-relaxed">
-        {filtered.map((d) => {
-          const on = selected.has(d.id);
-          return (
-            <label
-              key={d.id}
-              className={`flex items-center gap-2 cursor-pointer px-1 py-1 ${on ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <span
-                onClick={(e) => {
-                  e.preventDefault();
-                  toggle(d.id);
-                }}
-                className="inline-flex items-center justify-center h-4 w-4 border text-[10px] leading-none shrink-0"
-                style={
-                  on
-                    ? {
-                        borderColor: "var(--studio-accent)",
-                        backgroundColor: "var(--studio-accent)",
-                        color: "var(--background)",
-                      }
-                    : { borderColor: "var(--border)" }
-                }
-              >
-                {on ? "▸" : ""}
-              </span>
-              <input type="checkbox" checked={on} onChange={() => toggle(d.id)} className="sr-only" />
-              <span className="flex-1 truncate">{d.title}</span>
-              <span className="num text-[9px] uppercase tracking-[0.16em] text-muted-foreground shrink-0">
-                {d.page_count ?? "?"}p
-              </span>
-            </label>
-          );
-        })}
+      <div className="font-mono text-[11px] leading-relaxed space-y-3">
+        {grouped.map((group) => (
+          <div key={group.cluster}>
+            <div className="num text-[8px] uppercase tracking-[0.2em] text-muted-foreground mb-1 px-1">
+              {group.label}
+            </div>
+            {group.docs.map(renderDoc)}
+          </div>
+        ))}
+        {ungrouped.length > 0 && (
+          <div>
+            {grouped.length > 0 && (
+              <div className="num text-[8px] uppercase tracking-[0.2em] text-muted-foreground mb-1 px-1">
+                Other
+              </div>
+            )}
+            {ungrouped.map(renderDoc)}
+          </div>
+        )}
       </div>
     </div>
   );

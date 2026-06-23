@@ -14,3 +14,19 @@ export function getDocumentsDir(): string {
 export function getSeedsPath(): string {
   return path.join(getDataDir(), "seeds", "brand-context.json");
 }
+
+export function getKbManifestPath(): string {
+  return path.join(getDataDir(), "seeds", "kb-manifest.json");
+}
+
+export function getTranslationFixturesPath(): string {
+  return path.join(getDataDir(), "seeds", "translation-fixtures.json");
+}
+
+export function getDistillatesDir(): string {
+  return path.join(getDataDir(), "distillates");
+}
+
+export function getDefaultKbSeedDir(): string {
+  return path.resolve(getDataDir(), "../../knowledgeBaseDocs");
+}

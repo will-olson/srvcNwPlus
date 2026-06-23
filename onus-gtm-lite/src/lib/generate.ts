@@ -1,12 +1,17 @@
 import { createAiProvider, getDefaultModel } from "@/lib/ai/provider";
 import { CITATION_RULE, resolveModuleSystem } from "@/lib/prompts/modules";
 import {
+  formatDistillatesForPrompt,
+  rankChunksByTask,
+} from "@/lib/kb/distill";
+import {
   getChunksForDocuments,
   listDocuments,
   loadBrandContext,
+  loadDistillate,
   saveGeneration,
 } from "@/lib/kb/store";
-import type { BrandContext } from "@/lib/kb/types";
+import type { BrandContext, KbChunk } from "@/lib/kb/types";
 
 export type GenerateInput = {
   module: string;
@@ -59,11 +64,22 @@ export async function runGroundedGeneration(input: GenerateInput): Promise<Gener
   ]);
 
   const docTitle = new Map(docs.map((d) => [d.id, d.title]));
+  const distillates = (
+    await Promise.all(input.documentIds.map((id) => loadDistillate(id)))
+  ).filter((d): d is NonNullable<typeof d> => d !== null);
+
+  const distillateBlock = formatDistillatesForPrompt(distillates, docTitle);
+  const rankedChunks: KbChunk[] = rankChunksByTask(chunks, input.task, input.documentIds.length);
+
   const maxKb = input.maxKbChars ?? 280_000;
-  let used = 0;
+  let used = distillateBlock.length;
   const kbBlocks: string[] = [];
 
-  for (const c of chunks) {
+  if (distillateBlock.trim()) {
+    kbBlocks.push(`DOCUMENT DISTILLATES:\n${distillateBlock}`);
+  }
+
+  for (const c of rankedChunks) {
     const header = `[${docTitle.get(c.document_id) ?? "doc"} · p.${c.page ?? "?"}]`;
     const block = `${header}\n${c.content}\n`;
     if (used + block.length > maxKb) break;

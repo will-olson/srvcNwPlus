@@ -2,6 +2,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ACCENT_VAR, getDiscipline, type DisciplineId } from "@/config/disciplines";
+import { TRANSLATION_PRESETS } from "@/config/translation-presets";
 import {
   getUseCase,
   getUseCasesForDiscipline,
@@ -170,6 +171,23 @@ export function UnifiedGtmStudio() {
     [values],
   );
 
+  const applyPreset = (presetId: string) => {
+    const preset = TRANSLATION_PRESETS.find((p) => p.id === presetId);
+    if (!preset) return;
+
+    setDiscipline(preset.discipline as DisciplineId);
+    setUseCaseId(preset.useCaseId);
+    setValues(preset.fieldValues);
+    setMessages([]);
+    setFollowUp("");
+    setLastOutput("");
+
+    const matched = docs.filter((d) => preset.documentFilenames.includes(d.filename));
+    if (matched.length > 0) {
+      setSelected(new Set(matched.map((d) => d.id)));
+    }
+  };
+
   const accentStyle = { ["--studio-accent" as string]: ACCENT_VAR[accent] } as CSSProperties;
 
   return (
@@ -187,7 +205,7 @@ export function UnifiedGtmStudio() {
           </div>
           <h1 className="mt-2 font-display text-3xl tracking-tight">{useCase.title}</h1>
           <p className="mt-2 text-muted-foreground max-w-2xl text-sm">{useCase.intro}</p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <DisciplinePicker
               active={discipline}
               onChange={(id) => {
@@ -196,6 +214,21 @@ export function UnifiedGtmStudio() {
                 if (first) setUseCaseId(first.id);
               }}
             />
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="num text-[9px] uppercase tracking-[0.18em] text-muted-foreground self-center">
+              Translation presets
+            </span>
+            {TRANSLATION_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => applyPreset(preset.id)}
+                className="text-[10px] px-2 py-1 border border-border hover:border-[var(--studio-accent)] text-muted-foreground hover:text-foreground"
+              >
+                {preset.label}
+              </button>
+            ))}
           </div>
         </div>
 

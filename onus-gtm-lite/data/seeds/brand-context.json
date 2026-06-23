@@ -1,6 +1,65 @@
 {
-  "voice_rules": [],
-  "brand_wiki_sections": [],
-  "content_pillars": [],
-  "personas": []
+  "voice_rules": [
+    {
+      "kind": "do",
+      "rule": "Position Echelon as AI-native ServiceNow delivery infrastructure, not a coding assistant or chatbot.",
+      "example": "Give ServiceNow platform teams elastic AI developer capacity that turns requirements into deployable artifacts."
+    },
+    {
+      "kind": "do",
+      "rule": "Compete against the labor model — backlog, consultant rates, MSP SOWs — not just software tools.",
+      "example": "Its stated enemy is the six-month backlog and the overextended internal admin team."
+    },
+    {
+      "kind": "do",
+      "rule": "Use outcome language: capacity without headcount, faster time-to-value, governed delivery.",
+      "example": "Echelon sells capacity without headcount, faster backlog clearing, and standardized patterns."
+    },
+    {
+      "kind": "dont",
+      "rule": "Do not frame Echelon as merely Devin for ServiceNow or a better ServiceNow plug-in.",
+      "example": "Not: A better ServiceNow plug-in. Not exactly: Devin for ServiceNow."
+    },
+    {
+      "kind": "dont",
+      "rule": "Do not undersell the company as autocomplete or generic AI coding.",
+      "example": "That undersells the company. Echelon's real opportunity is not autocomplete."
+    }
+  ],
+  "brand_wiki_sections": [
+    {
+      "title": "Positioning statement",
+      "body_md": "Echelon AI is an **AI-native ServiceNow implementation, development, and managed-services layer**. Its wedge is elastic AI developer capacity that turns messy requirements into catalog items, flows, scoped apps, integrations, ATF tests, documentation, and deployable artifacts. The real market category is **verticalized AI delivery infrastructure for enterprise software platforms, beginning with ServiceNow** — closer to compressed SI/MSP delivery capacity with architect oversight than a generic coding tool."
+    },
+    {
+      "title": "Category definition",
+      "body_md": "Echelon competes less with software tools and more with the labor model around enterprise platforms: the backlog, expensive consultants, overextended admin teams, and MSP SOWs that bill for investigation, testing, documentation, and routine development."
+    },
+    {
+      "title": "Counter-positioning vs ServiceNow native AI",
+      "body_md": "ServiceNow native AI is an in-platform capability. Echelon positions as the **delivery system**: instance-aware, governance-aware, implementation-lifecycle-aware, and staffed with ServiceNow experts who can own outcomes, not just generate artifacts."
+    }
+  ],
+  "content_pillars": [
+    {
+      "slug": "delivery-infrastructure",
+      "title": "AI-native delivery infrastructure",
+      "theme": "Platform delivery capacity vs point tools"
+    },
+    {
+      "slug": "msp-displacement",
+      "title": "MSP and SI displacement",
+      "theme": "Outcomes over billable hours"
+    },
+    {
+      "slug": "governed-servicenow",
+      "title": "Governed ServiceNow outcomes",
+      "theme": "Tests, docs, governance, architect review"
+    }
+  ],
+  "personas": [
+    { "slug": "vp-platform", "name": "VP Enterprise Applications / ServiceNow Platform Owner" },
+    { "slug": "cio", "name": "CIO / CTO / Chief Digital Officer" },
+    { "slug": "architect", "name": "ServiceNow Architect / CMA" }
+  ]
 }

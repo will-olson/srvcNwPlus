@@ -1,1 +1,7 @@
 .env
+onus-gtm-lite/data/documents/*
+onus-gtm-lite/data/chunks.json
+onus-gtm-lite/data/generations.json
+onus-gtm-lite/data/documents-index.json
+onus-gtm-lite/data/distillates/*
+onus-gtm-lite/data/test-runs/*

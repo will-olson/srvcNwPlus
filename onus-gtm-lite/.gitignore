@@ -7,4 +7,8 @@ data/documents/*
 data/chunks.json
 data/generations.json
 data/documents-index.json
+data/distillates/*
+!data/distillates/.gitkeep
+data/test-runs/*
+!data/test-runs/.gitkeep
 .DS_Store

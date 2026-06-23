@@ -11,10 +11,13 @@ cd onus-gtm-lite
 cp .env.example .env
 # Set OPENAI_API_KEY in .env
 npm install
+npm run seed:kb
 npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
+
+Seed documents load from `../knowledgeBaseDocs` (7 markdown GTM reference docs). Run `npm run seed:kb` after clone or when KB docs change.
 
 ## Features
 
@@ -22,7 +25,7 @@ Open [http://localhost:5173](http://localhost:5173).
 - **5 disciplines** — Brand studio, Product strategy, Enablement & operations, Competitive, Persona positioning
 - **20 use cases** — Pillar map, battlecards, campaigns, KPI framework, and more (ported from OnusGTM)
 - **Multi-format uploads** — PDF (unpdf), Markdown, DOCX (mammoth)
-- **Grounded generation** — KB chunks + optional brand voice/wiki from `data/seeds/brand-context.json`
+- **Grounded generation** — KB chunks + document distillates + optional brand voice/wiki from `data/seeds/brand-context.json`
 - **Follow-up refinement** — Chat-style follow-ups on the last draft
 - **Pluggable AI** — OpenAI (default) or Lovable gateway via env
 
@@ -35,15 +38,18 @@ Open [http://localhost:5173](http://localhost:5173).
 | `AI_PROVIDER` | `openai` | Set to `lovable` for Lovable gateway |
 | `LOVABLE_API_KEY` | — | Required when `AI_PROVIDER=lovable` |
 | `DATA_DIR` | `./data` | Local storage for documents and history |
+| `KB_SEED_DIR` | `../knowledgeBaseDocs` | Source directory for `npm run seed:kb` |
+| `DISTILL_ON_INGEST` | `false` | When `true`, run LLM summary distillation on ingest |
+| `SEED_KB_ON_START` | `false` | Reserved for optional dev startup seeding |
 
 ## Architecture
 
 ```
-Upload (PDF/MD/DOCX) → chunk (~4500 chars) → data/chunks.json
+Upload (PDF/MD/DOCX) → section-aware extract → chunk (~4500 chars) → distillate index
                               ↓
-Discipline → Use case → Dynamic form → buildTask() prompt
+Discipline → use case → Dynamic form → buildTask() prompt
                               ↓
-         MODULE_SYSTEM + brand context + KB excerpts
+         MODULE_SYSTEM + brand context + distillates + KB excerpts
                               ↓
                     OpenAI / Lovable → markdown output
 ```
@@ -58,6 +64,31 @@ Discipline → Use case → Dynamic form → buildTask() prompt
 | `src/lib/generate.ts` | Prompt assembly + AI call |
 | `src/components/gtm/UnifiedGtmStudio.tsx` | Main UI |
 | `data/seeds/brand-context.json` | Optional voice rules and wiki sections |
+| `data/seeds/kb-manifest.json` | Seed doc metadata (cluster, series, title) |
+| `data/seeds/translation-fixtures.json` | Integration test scenarios for translation use cases |
+
+## Knowledge base seed docs
+
+| Doc cluster | Files | Recommended use cases |
+|-------------|-------|------------------------|
+| Echelon | Personas (A), Verticals (B), Technical (C), Competitive | `persona`, `campaign`, `battlecard`, `product-positioning` |
+| Profound | GTM strategy playbook | `editorial`, `report`, `battlecard`, `campaign` |
+| Monte Carlo | Competitive analysis, Industries | `competitive-landscape`, `report`, `pillars` |
+
+## Testing
+
+```bash
+# Unit tests: section-aware markdown ingest + chunking (no API key)
+npm run test:ingest
+
+# Seed KB docs from ../knowledgeBaseDocs
+npm run seed:kb
+
+# Integration: 4 translation fixtures (requires OPENAI_API_KEY)
+npm run test:translation
+```
+
+Translation presets in the UI mirror the fixture scenarios (Echelon persona, campaign, battlecard, voice).
 
 ## Adding a use case
 
