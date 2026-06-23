@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.data
+data/documents/*
+!data/documents/.gitkeep
+data/chunks.json
+data/generations.json
+data/documents-index.json
+.DS_Store
