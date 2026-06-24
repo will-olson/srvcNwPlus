@@ -1,0 +1,52 @@
+{
+  "name": "onus-gtm-lite",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "seed:kb": "tsx scripts/seed-kb.ts",
+    "test:ingest": "vitest run src/lib/kb/ingest.test.ts",
+    "test:selection": "vitest run src/lib/kb/selection-policy.test.ts",
+    "test:news": "vitest run src/lib/news/",
+    "test:translation": "tsx scripts/run-translation-fixtures.ts"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.8",
+    "@tanstack/react-query": "^5.83.0",
+    "@tanstack/react-router": "^1.168.25",
+    "@tanstack/react-start": "^1.167.50",
+    "mammoth": "^1.9.0",
+    "openai": "^4.104.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.2.1",
+    "unpdf": "^1.6.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@tanstack/router-plugin": "^1.167.28",
+    "@types/node": "^22.16.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "dotenv": "^16.6.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vite": "^8.0.16",
+    "vite-tsconfig-paths": "^6.0.2",
+    "vitest": "^3.2.4"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.1.2"
+  }
+}

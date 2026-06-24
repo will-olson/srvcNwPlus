@@ -1,0 +1,14 @@
+{
+  "name": "gtm-tooling-suite",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "npm run dev -w onus-gtm-lite",
+    "build": "npm run build -w onus-gtm-lite",
+    "seed:kb": "npm run seed:kb -w onus-gtm-lite",
+    "test:ingest": "npm run test:ingest -w onus-gtm-lite"
+  },
+  "engines": {
+    "node": ">=20.19.0 || >=22.12.0"
+  }
+}

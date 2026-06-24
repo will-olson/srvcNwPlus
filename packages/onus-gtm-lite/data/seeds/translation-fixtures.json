@@ -1,0 +1,59 @@
+[
+  {
+    "id": "echelon-persona",
+    "label": "Echelon buyer persona brief",
+    "useCaseId": "persona",
+    "discipline": "persona-positioning",
+    "documentFilenames": ["echelon-personas.md"],
+    "fieldValues": {
+      "segment": "VP Enterprise Applications / ServiceNow Platform Owner"
+    },
+    "expectCitationsFrom": ["Echelon — Document A"],
+    "expectTerms": ["ServiceNow", "delivery", "backlog"]
+  },
+  {
+    "id": "echelon-vertical-campaign",
+    "label": "Echelon vertical GTM campaign",
+    "useCaseId": "campaign",
+    "discipline": "persona-positioning",
+    "documentFilenames": ["echelon-verticals.md"],
+    "fieldValues": {
+      "objective": "Generate qualified pipeline for ServiceNow modernization",
+      "audience": "Healthcare",
+      "window": "6 weeks",
+      "channels": "LinkedIn, email, webinar"
+    },
+    "expectCitationsFrom": ["Echelon — Document B"],
+    "expectTerms": ["healthcare", "ServiceNow", "workflow"]
+  },
+  {
+    "id": "profound-outbound",
+    "label": "Profound vertical outbound",
+    "useCaseId": "campaign",
+    "discipline": "persona-positioning",
+    "documentFilenames": ["profound-gtm-strategy.md"],
+    "fieldValues": {
+      "objective": "Book discovery meetings with marketing leaders evaluating AEO",
+      "audience": "B2B SaaS",
+      "window": "4 weeks",
+      "channels": "LinkedIn, email"
+    },
+    "expectCitationsFrom": ["Profound"],
+    "expectTerms": ["AI", "search", "visibility"]
+  },
+  {
+    "id": "competitive-unified-battlecard",
+    "label": "Cross-vendor unified battlecard",
+    "useCaseId": "battlecard",
+    "discipline": "competitive",
+    "documentFilenames": [
+      "echelon-competitive-positioning.md",
+      "monte-carlo-competitive-analysis.md"
+    ],
+    "fieldValues": {
+      "competitor": "ServiceNow native AI"
+    },
+    "expectCitationsFrom": ["Echelon", "Monte Carlo"],
+    "expectTerms": ["ServiceNow", "governance", "delivery"]
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "echelon-personas.md": {
+    "cluster": "echelon",
+    "series": "A",
+    "title": "Echelon — Document A: Personas"
+  },
+  "echelon-verticals.md": {
+    "cluster": "echelon",
+    "series": "B",
+    "title": "Echelon — Document B: Verticals"
+  },
+  "echelon-technical-use-cases.md": {
+    "cluster": "echelon",
+    "series": "C",
+    "title": "Echelon — Document C: Technical Use Cases"
+  },
+  "echelon-competitive-positioning.md": {
+    "cluster": "echelon",
+    "series": null,
+    "title": "Echelon — Competitive Positioning"
+  },
+  "profound-gtm-strategy.md": {
+    "cluster": "profound",
+    "series": null,
+    "title": "Profound — GTM Strategy Playbook"
+  },
+  "monte-carlo-competitive-analysis.md": {
+    "cluster": "monte-carlo",
+    "series": null,
+    "title": "Monte Carlo — Competitive Analysis"
+  },
+  "monte-carlo-industries.md": {
+    "cluster": "monte-carlo",
+    "series": null,
+    "title": "Monte Carlo — Industry Strategy"
+  }
+}
